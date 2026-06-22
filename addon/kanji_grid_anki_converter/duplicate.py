@@ -10,7 +10,6 @@ from .tiles import replace_kanji_with_tiles
 class ConversionOptions:
     source_deck_name: str
     output_deck_name: str
-    selected_fields: tuple[str, ...]
 
 
 @dataclass
@@ -24,12 +23,9 @@ class ConversionStats:
 def build_kanji_grid_deck(collection: Any, options: ConversionOptions) -> ConversionStats:
     if options.source_deck_name == options.output_deck_name:
         raise ValueError("Output deck must be different from source deck.")
-    if not options.selected_fields:
-        raise ValueError("Select at least one field to convert.")
 
     output_deck_id = _deck_id(collection, options.output_deck_name)
     source_note_ids = collection.find_notes(f'deck:"{options.source_deck_name}"')
-    selected_fields = set(options.selected_fields)
     stats = ConversionStats(notes_seen=len(source_note_ids))
 
     for note_id in source_note_ids:
@@ -39,13 +35,12 @@ def build_kanji_grid_deck(collection: Any, options: ConversionOptions) -> Conver
 
         for field_name in source_note.keys():
             value = source_note[field_name]
-            if field_name in selected_fields:
-                result = replace_kanji_with_tiles(value)
-                value = result.text
-                if result.replacements:
-                    note_changed = True
-                    stats.fields_changed += 1
-                    stats.replacements += result.replacements
+            result = replace_kanji_with_tiles(value)
+            value = result.text
+            if result.replacements:
+                note_changed = True
+                stats.fields_changed += 1
+                stats.replacements += result.replacements
             target_note[field_name] = value
 
         target_note.tags = list(source_note.tags)

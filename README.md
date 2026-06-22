@@ -1,6 +1,6 @@
 # Kanji Grid Anki Converter
 
-Create Anki decks where mapped kanji are rendered as Kanji Grid four-corner tiles. The MVP path is a native Anki add-on: it duplicates notes into a new deck inside Anki, transforms selected fields, and leaves the original deck untouched.
+Create Anki decks where mapped kanji are rendered as Kanji Grid four-corner tiles. The MVP path is a native Anki add-on: it duplicates notes into a new deck inside Anki, transforms every note field, and leaves the original deck untouched.
 
 The bundled mapping covers the same canonical set as the Kanji Grid memorizer app: all Joyo kanji plus the Jinmeiyo supplemental set, 2,999 entries total.
 
@@ -20,7 +20,7 @@ In Anki, run:
 Tools > Create Kanji Grid Deck...
 ```
 
-Choose a source deck, select the fields to transform, and confirm the output deck name. The add-on creates fresh duplicate notes/cards in the output deck. It stores nothing outside Anki's own collection.
+Choose a source deck and confirm the output deck name. The add-on creates fresh duplicate notes/cards in the output deck and transforms mapped kanji in every note field. It stores nothing outside Anki's own collection.
 
 ## APKG CLI
 

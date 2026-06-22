@@ -64,7 +64,7 @@ class FakeCollection:
     def __init__(self):
         self.decks = FakeDecks()
         self.source_notes = {
-            1: FakeNote({"Expression": "漢字[かんじ]", "Meaning": "kanji"}, ["source-tag"]),
+            1: FakeNote({"Expression": "漢字[かんじ]", "Meaning": "愛"}, ["source-tag"]),
             2: FakeNote({"Expression": "かな", "Meaning": "kana"}, []),
         }
         self.created_notes = []
@@ -89,22 +89,21 @@ class AddonDuplicateTests(unittest.TestCase):
         options = duplicate.ConversionOptions(
             source_deck_name="Japanese",
             output_deck_name="Japanese::Kanji Grid",
-            selected_fields=("Expression",),
         )
 
         stats = duplicate.build_kanji_grid_deck(collection, options)
 
         self.assertEqual(stats.notes_seen, 2)
         self.assertEqual(stats.notes_created, 2)
-        self.assertEqual(stats.fields_changed, 1)
-        self.assertEqual(stats.replacements, 2)
+        self.assertEqual(stats.fields_changed, 2)
+        self.assertEqual(stats.replacements, 3)
         self.assertEqual(collection.query, 'deck:"Japanese"')
         self.assertEqual(collection.decks.created["Japanese::Kanji Grid"], 100)
 
         first_note = collection.created_notes[0][1]
         self.assertIn("kanji-grid-tile", first_note["Expression"])
         self.assertIn("[かんじ]", first_note["Expression"])
-        self.assertEqual(first_note["Meaning"], "kanji")
+        self.assertIn("kanji-grid-tile", first_note["Meaning"])
         self.assertIn("source-tag", first_note.tags)
         self.assertIn("kanji-grid", first_note.tags)
 
@@ -119,7 +118,6 @@ class AddonDuplicateTests(unittest.TestCase):
                 duplicate.ConversionOptions(
                     source_deck_name="Japanese",
                     output_deck_name="Japanese",
-                    selected_fields=("Expression",),
                 ),
             )
 

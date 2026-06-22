@@ -17,9 +17,6 @@ def open_converter_dialog() -> None:
         return
 
     options = dialog.options()
-    if not options.selected_fields:
-        showCritical("Select at least one note field to convert.")
-        return
 
     try:
         stats = dialog.run_conversion()
