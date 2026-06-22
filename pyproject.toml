@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "kanji-grid-anki-converter"
+version = "0.1.0"
+description = "Convert Anki kanji fields into Kanji Grid tile fields."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Kanji Grid Tools" }]
+dependencies = []
+
+[project.scripts]
+kanji-grid-anki = "kanji_grid_anki_converter.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/kanji_grid_anki_converter"]
