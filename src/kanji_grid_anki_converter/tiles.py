@@ -71,8 +71,11 @@ def build_tile_html(kanji: str, code: str) -> str:
 
     colors = [TILE_COLORS[int(digit)] for digit in code]
     cells = "".join(
-        f"<span aria-hidden=\"true\" style=\"display:block;background:{color};\"></span>"
-        for color in colors
+        f"<span aria-hidden=\"true\" style=\"position:absolute;{position}width:50%;height:50%;background:{color};\"></span>"
+        for color, position in zip(
+            colors,
+            ("left:0;top:0;", "right:0;top:0;", "left:0;bottom:0;", "right:0;bottom:0;"),
+        )
     )
     escaped_kanji = escape(kanji, quote=True)
     escaped_code = escape(code, quote=True)
@@ -80,8 +83,7 @@ def build_tile_html(kanji: str, code: str) -> str:
     return (
         f"<span class=\"kanji-grid-tile\" data-kanji-grid-code=\"{escaped_code}\" "
         f"aria-label=\"{escaped_kanji} Kanji Grid tile code {escaped_code}\" "
-        "style=\"display:inline-grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;"
-        "position:relative;width:1.18em;height:1.18em;vertical-align:-0.12em;"
+        "style=\"display:inline-block;position:relative;width:1em;height:1em;vertical-align:-0.04em;"
         "margin:0 0.04em;border:1px solid #d1d5db;border-radius:0.18em;overflow:hidden;"
         "background:#ffffff;line-height:1;box-sizing:border-box;\">"
         f"{cells}"
