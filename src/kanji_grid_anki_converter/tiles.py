@@ -88,11 +88,11 @@ def build_tile_html(kanji: str, code: str) -> str:
         "background:#ffffff;line-height:1;box-sizing:border-box;\">"
         f"{cells}"
         "<span aria-hidden=\"true\" "
-        "style=\"position:absolute;left:50%;top:50%;display:flex;width:66%;height:66%;"
+        "style=\"position:absolute;left:50%;top:50%;display:flex;width:80%;height:80%;"
         "transform:translate(-50%,-50%);align-items:center;justify-content:center;"
         "border-radius:0.14em;background:#ffffff;color:#111827;"
         "font-family:'Hiragino Mincho ProN','Yu Mincho','Noto Serif CJK JP',serif;"
-        "font-size:0.82em;font-weight:600;line-height:1;\">"
+        "font-size:0.68em;font-weight:600;line-height:1;\">"
         f"{escaped_kanji}</span></span>"
     )
 

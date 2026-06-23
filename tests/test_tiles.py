@@ -35,8 +35,8 @@ class TileReplacementTests(unittest.TestCase):
         self.assertEqual(html.count('aria-hidden="true"'), 5)
         self.assertIn('data-kanji-grid-code="1424"', html)
         self.assertIn("display:inline-block;position:relative;width:1.24em;height:1.24em;vertical-align:-0.10em", html)
-        self.assertIn("display:flex;width:66%;height:66%", html)
-        self.assertIn("font-size:0.82em", html)
+        self.assertIn("display:flex;width:80%;height:80%", html)
+        self.assertIn("font-size:0.68em", html)
         self.assertIn("left:0;top:0;width:50%;height:50%", html)
         self.assertIn("愛", html)
 
