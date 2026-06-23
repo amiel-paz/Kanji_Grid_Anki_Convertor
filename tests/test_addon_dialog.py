@@ -13,17 +13,25 @@ class FakeSignal:
     def connect(self, callback):
         self.callback = callback
 
+    def emit(self, *args):
+        self.callback(*args)
+
 
 class FakeComboBox:
     def __init__(self, parent=None):
         self.items = []
+        self.current_index = 0
         self.currentIndexChanged = FakeSignal()
 
     def addItem(self, text, data):
         self.items.append((text, data))
 
     def currentText(self):
-        return self.items[0][0] if self.items else ""
+        return self.items[self.current_index][0] if self.items else ""
+
+    def setCurrentIndex(self, index):
+        self.current_index = index
+        self.currentIndexChanged.emit(index)
 
 
 class FakeDialog:
@@ -156,6 +164,21 @@ class AddonDialogTests(unittest.TestCase):
 
         self.assertEqual(options.source_deck_name, "Core")
         self.assertEqual(options.output_deck_name, "Core Kanji Grid")
+
+    def test_output_name_auto_updates_until_user_customizes_it(self):
+        dialog_module = load_dialog_module()
+
+        dialog = dialog_module.KanjiGridDialog(FakeMainWindow())
+        dialog.deck_combo.setCurrentIndex(1)
+
+        self.assertEqual(dialog.options().source_deck_name, "JLPT N2 単語")
+        self.assertEqual(dialog.options().output_deck_name, "JLPT N2 単語 Kanji Grid")
+
+        dialog.output_name.setText("My custom output")
+        dialog.deck_combo.setCurrentIndex(0)
+
+        self.assertEqual(dialog.options().source_deck_name, "Core")
+        self.assertEqual(dialog.options().output_deck_name, "My custom output")
 
 
 if __name__ == "__main__":

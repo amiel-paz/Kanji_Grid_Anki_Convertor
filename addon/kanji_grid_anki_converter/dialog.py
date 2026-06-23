@@ -29,6 +29,7 @@ class KanjiGridDialog(QDialog):
 
         self.setWindowTitle("Create Kanji Grid Deck")
         self.setMinimumWidth(520)
+        self._auto_output_name = ""
 
         self.deck_combo = QComboBox(self)
         for choice in self._deck_choices:
@@ -68,13 +69,17 @@ class KanjiGridDialog(QDialog):
             choices.append(DeckChoice(id=int(deck.id), name=str(deck.name)))
         return sorted(choices, key=lambda choice: choice.name.lower())
 
-    def _refresh_output_name(self) -> None:
+    def _refresh_output_name(self, *_ignored) -> None:
         source_deck_name = self.deck_combo.currentText()
         if not source_deck_name:
             return
 
-        if not self.output_name.text().strip():
-            self.output_name.setText(default_output_deck_name(source_deck_name))
+        current_output_name = self.output_name.text().strip()
+        if current_output_name and current_output_name != self._auto_output_name:
+            return
+
+        self._auto_output_name = default_output_deck_name(source_deck_name)
+        self.output_name.setText(self._auto_output_name)
 
     def _accept_if_valid(self) -> None:
         options = self.options()
