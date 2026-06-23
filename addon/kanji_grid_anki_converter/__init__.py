@@ -43,6 +43,29 @@ def open_converter_dialog() -> None:
         showCritical(f"Kanji Grid conversion failed:\n\n{details}")
 
 
+def sync_existing_kanji_grid_scheduling() -> None:
+    try:
+        if mw.col is None:
+            showCritical("Open an Anki collection before syncing Kanji Grid scheduling.")
+            return
+
+        from .duplicate import sync_kanji_grid_scheduling
+
+        stats = sync_kanji_grid_scheduling(mw.col)
+        mw.reset()
+        showInfo(
+            "Kanji Grid scheduling synced.\n\n"
+            f"Deck pairs found: {stats.deck_pairs_seen}\n"
+            f"Cards checked: {stats.cards_seen}\n"
+            f"Cards updated: {stats.cards_updated}\n"
+            f"Cards unmatched: {stats.cards_unmatched}"
+        )
+    except Exception:
+        details = traceback.format_exc()
+        _write_last_error(details)
+        showCritical(f"Kanji Grid scheduling sync failed:\n\n{details}")
+
+
 def _write_last_error(details: str) -> None:
     try:
         Path(__file__).with_name("last_error.txt").write_text(details, encoding="utf-8")
@@ -53,3 +76,7 @@ def _write_last_error(details: str) -> None:
 action = QAction("Create Kanji Grid Deck...", mw)
 qconnect(action.triggered, open_converter_dialog)
 mw.form.menuTools.addAction(action)
+
+sync_action = QAction("Sync Kanji Grid Scheduling", mw)
+qconnect(sync_action.triggered, sync_existing_kanji_grid_scheduling)
+mw.form.menuTools.addAction(sync_action)

@@ -1,6 +1,12 @@
 import unittest
 
-from kanji_grid_anki_converter.tiles import TILE_CODES, build_tile_html, contains_kanji, replace_kanji_with_tiles
+from kanji_grid_anki_converter.tiles import (
+    TILE_CODES,
+    build_tile_html,
+    contains_kanji,
+    plain_text_for_matching,
+    replace_kanji_with_tiles,
+)
 
 
 class TileReplacementTests(unittest.TestCase):
@@ -46,6 +52,11 @@ class TileReplacementTests(unittest.TestCase):
 
         self.assertEqual(result.replacements, 0)
         self.assertEqual(result.text, html)
+
+    def test_plain_text_for_matching_strips_tile_markup(self):
+        html = replace_kanji_with_tiles("知合い").text
+
+        self.assertEqual(plain_text_for_matching(html), "知合い")
 
 
 if __name__ == "__main__":

@@ -24,6 +24,8 @@ Tools > Create Kanji Grid Deck...
 
 Choose a source deck and confirm the output deck name. The add-on creates fresh duplicate notes/cards in the output deck and transforms mapped kanji in every note field. It stores nothing outside Anki's own collection.
 
+Use `Tools > Sync Kanji Grid Scheduling` to update existing Kanji Grid decks so their cards match the review status and scheduling of the corresponding cards in the original decks.
+
 ## APKG CLI
 
 The repo also includes a batch converter for `.apkg` files.

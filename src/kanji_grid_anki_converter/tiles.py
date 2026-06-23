@@ -65,6 +65,13 @@ def replace_kanji_with_tiles(text: str, tile_codes: Mapping[str, str] = TILE_COD
     )
 
 
+def plain_text_for_matching(text: str) -> str:
+    parser = _PlainTextHTMLParser()
+    parser.feed(text)
+    parser.close()
+    return parser.output
+
+
 def build_tile_html(kanji: str, code: str) -> str:
     if len(code) != 4 or any(digit not in "01234567" for digit in code):
         raise ValueError(f"Invalid Kanji Grid tile code for {kanji!r}: {code!r}")
@@ -173,6 +180,19 @@ class _KanjiTileHTMLParser(HTMLParser):
 
     def handle_pi(self, data: str) -> None:
         self._parts.append(f"<?{data}>")
+
+
+class _PlainTextHTMLParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self._parts: list[str] = []
+
+    @property
+    def output(self) -> str:
+        return "".join(self._parts)
+
+    def handle_data(self, data: str) -> None:
+        self._parts.append(data)
 
 
 def _format_start_tag(

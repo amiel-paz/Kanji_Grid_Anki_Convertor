@@ -2,6 +2,7 @@ import importlib.util
 import sys
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -57,14 +58,47 @@ class FakeNote:
 
 
 class FakeCard:
-    def __init__(self, card_id, note_id, ordinal, question):
+    def __init__(
+        self,
+        card_id,
+        note_id,
+        ordinal,
+        question,
+        *,
+        did=1,
+        due=0,
+        queue=0,
+        card_type=0,
+        ivl=0,
+        reps=0,
+    ):
         self.id = card_id
         self.nid = note_id
         self.ord = ordinal
         self._question = question
+        self.did = did
+        self.due = due
+        self.queue = queue
+        self.type = card_type
+        self.ivl = ivl
+        self.factor = 2500
+        self.reps = reps
+        self.lapses = 0
+        self.left = 0
+        self.flags = 0
+        self.odue = 0
+        self.odid = 0
+        self.flushed = False
+        self._note = None
 
     def question(self):
         return self._question
+
+    def note(self):
+        return self._note
+
+    def flush(self):
+        self.flushed = True
 
 
 class FakeDecks:
@@ -74,6 +108,9 @@ class FakeDecks:
     def id_for_name(self, name):
         deck_id = len(self.created) + 100
         return self.created.setdefault(name, deck_id)
+
+    def all_names_and_ids(self):
+        return [SimpleNamespace(name=name, id=deck_id) for name, deck_id in self.created.items()]
 
 
 class FakeFilteredDecks(FakeDecks):
@@ -92,14 +129,17 @@ class FakeCollection:
             3: FakeNote({"Expression": "𠮷野", "Meaning": "unmapped compatibility test"}, []),
         }
         self.source_cards = {
-            11: FakeCard(11, 1, 0, "漢字[かんじ]"),
-            12: FakeCard(12, 1, 1, "kana-only prompt"),
-            21: FakeCard(21, 2, 0, "かな"),
-            31: FakeCard(31, 3, 0, "𠮷野"),
+            11: FakeCard(11, 1, 0, "漢字[かんじ]", did=11, due=42, queue=2, card_type=2, ivl=15, reps=9),
+            12: FakeCard(12, 1, 1, "kana-only prompt", did=11, due=99, queue=2, card_type=2),
+            21: FakeCard(21, 2, 0, "かな", did=11),
+            31: FakeCard(31, 3, 0, "𠮷野", did=11, due=7, queue=1, card_type=1, ivl=3, reps=4),
         }
+        for card in self.source_cards.values():
+            card._note = self.source_notes[card.nid]
         self.created_notes = []
         self.created_cards = {}
         self.removed_card_ids = []
+        self.updated_cards = []
         self.next_card_id = 1000
 
     def find_cards(self, query):
@@ -120,11 +160,16 @@ class FakeCollection:
         for ordinal in self.source_notes[len(self.created_notes) + 1].card_ordinals:
             self.next_card_id += 1
             note.generated_card_ids.append(self.next_card_id)
-            self.created_cards[self.next_card_id] = FakeCard(self.next_card_id, len(self.created_notes) + 101, ordinal, "")
+            card = FakeCard(self.next_card_id, len(self.created_notes) + 101, ordinal, "", did=deck_id)
+            card._note = note
+            self.created_cards[self.next_card_id] = card
         self.created_notes.append((deck_id, note))
 
     def remove_cards_and_orphaned_notes(self, card_ids):
         self.removed_card_ids.extend(card_ids)
+
+    def update_card(self, card):
+        self.updated_cards.append(card.id)
 
 
 class FakeFilteredCollection(FakeCollection):
@@ -163,6 +208,14 @@ class AddonDuplicateTests(unittest.TestCase):
 
         self.assertEqual(len(collection.created_notes), 2)
         self.assertEqual(len(collection.removed_card_ids), 1)
+        kept_card = collection.created_cards[1001]
+        self.assertEqual(kept_card.did, 100)
+        self.assertEqual(kept_card.due, 42)
+        self.assertEqual(kept_card.queue, 2)
+        self.assertEqual(kept_card.type, 2)
+        self.assertEqual(kept_card.ivl, 15)
+        self.assertEqual(kept_card.reps, 9)
+        self.assertEqual(collection.updated_cards, [1001, 1003])
         second_note = collection.created_notes[1][1]
         self.assertIn("𠮷", second_note["Expression"])
         self.assertIn("kanji-grid-tile", second_note["Expression"])
@@ -197,6 +250,33 @@ class AddonDuplicateTests(unittest.TestCase):
             duplicate.default_output_deck_name("Parent::Child"),
             "Parent - Child Kanji Grid",
         )
+
+    def test_syncs_existing_kanji_grid_deck_scheduling(self):
+        collection = FakeCollection()
+        collection.decks.created = {"Japanese": 11, "Japanese Kanji Grid": 100}
+        target_note = FakeNote(
+            {
+                "Expression": duplicate.replace_kanji_with_tiles("漢字[かんじ]").text,
+                "Meaning": duplicate.replace_kanji_with_tiles("愛").text,
+            },
+            ["kanji-grid"],
+        )
+        target_card = FakeCard(5001, 501, 0, "", did=100, due=0, queue=0)
+        target_card._note = target_note
+        collection.created_cards[5001] = target_card
+        collection.find_cards = lambda query: [5001] if "Kanji Grid" in query else [11, 12, 21, 31]
+
+        stats = duplicate.sync_kanji_grid_scheduling(collection)
+
+        self.assertEqual(stats.deck_pairs_seen, 1)
+        self.assertEqual(stats.cards_seen, 1)
+        self.assertEqual(stats.cards_updated, 1)
+        self.assertEqual(stats.cards_unmatched, 0)
+        self.assertEqual(target_card.did, 100)
+        self.assertEqual(target_card.due, 42)
+        self.assertEqual(target_card.queue, 2)
+        self.assertEqual(target_card.ivl, 15)
+        self.assertEqual(target_card.reps, 9)
 
 
 if __name__ == "__main__":
