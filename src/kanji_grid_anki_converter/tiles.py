@@ -83,16 +83,16 @@ def build_tile_html(kanji: str, code: str) -> str:
     return (
         f"<span class=\"kanji-grid-tile\" data-kanji-grid-code=\"{escaped_code}\" "
         f"aria-label=\"{escaped_kanji} Kanji Grid tile code {escaped_code}\" "
-        "style=\"display:inline-block;position:relative;width:1.24em;height:1.24em;vertical-align:-0.10em;"
+        "style=\"display:inline-block;position:relative;width:1.42em;height:1.42em;vertical-align:-0.18em;"
         "margin:0 0.04em;border:1px solid #d1d5db;border-radius:0.18em;overflow:hidden;"
         "background:#ffffff;line-height:1;box-sizing:border-box;\">"
         f"{cells}"
         "<span aria-hidden=\"true\" "
-        "style=\"position:absolute;left:50%;top:50%;display:flex;width:80%;height:80%;"
+        "style=\"position:absolute;left:50%;top:50%;display:flex;width:76%;height:76%;"
         "transform:translate(-50%,-50%);align-items:center;justify-content:center;"
         "border-radius:0.14em;background:#ffffff;color:#111827;"
         "font-family:'Hiragino Mincho ProN','Yu Mincho','Noto Serif CJK JP',serif;"
-        "font-size:0.68em;font-weight:600;line-height:1;\">"
+        "font-size:0.88em;font-weight:600;line-height:1;\">"
         f"{escaped_kanji}</span></span>"
     )
 
