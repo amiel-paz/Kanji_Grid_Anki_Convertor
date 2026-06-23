@@ -29,6 +29,7 @@ class TileReplacementTests(unittest.TestCase):
 
         self.assertEqual(html.count('aria-hidden="true"'), 5)
         self.assertIn('data-kanji-grid-code="1424"', html)
+        self.assertIn("width:1.18em;height:1.18em;vertical-align:-0.12em", html)
         self.assertIn("愛", html)
 
     def test_already_converted_tile_html_is_not_replaced_again(self):

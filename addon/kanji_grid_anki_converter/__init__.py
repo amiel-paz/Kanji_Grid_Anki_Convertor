@@ -32,6 +32,8 @@ def open_converter_dialog() -> None:
             "Kanji Grid deck created.\n\n"
             f"Output deck: {stats.output_deck_name}\n"
             f"Notes created: {stats.notes_created}\n"
+            f"Cards created: {stats.cards_created}\n"
+            f"Cards skipped: {stats.cards_skipped}\n"
             f"Fields changed: {stats.fields_changed}\n"
             f"Kanji replacements: {stats.replacements}"
         )

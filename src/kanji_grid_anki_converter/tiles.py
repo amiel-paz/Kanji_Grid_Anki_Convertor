@@ -35,6 +35,10 @@ TILE_CODES = load_tile_codes()
 TILE_COLORS = load_tile_colors()
 
 
+def contains_mapped_kanji(text: str, tile_codes: Mapping[str, str] = TILE_CODES) -> bool:
+    return replace_kanji_with_tiles(text, tile_codes).replacements > 0
+
+
 def replace_kanji_with_tiles(text: str, tile_codes: Mapping[str, str] = TILE_CODES) -> ReplacementResult:
     parser = _KanjiTileHTMLParser(tile_codes)
     parser.feed(text)
@@ -62,7 +66,7 @@ def build_tile_html(kanji: str, code: str) -> str:
         f"<span class=\"kanji-grid-tile\" data-kanji-grid-code=\"{escaped_code}\" "
         f"aria-label=\"{escaped_kanji} Kanji Grid tile code {escaped_code}\" "
         "style=\"display:inline-grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;"
-        "position:relative;width:1.45em;height:1.45em;vertical-align:-0.32em;"
+        "position:relative;width:1.18em;height:1.18em;vertical-align:-0.12em;"
         "margin:0 0.04em;border:1px solid #d1d5db;border-radius:0.18em;overflow:hidden;"
         "background:#ffffff;line-height:1;box-sizing:border-box;\">"
         f"{cells}"
