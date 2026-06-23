@@ -4,6 +4,8 @@ Create Anki decks where mapped kanji are rendered as Kanji Grid four-corner tile
 
 The bundled mapping covers the same canonical set as the Kanji Grid memorizer app: all Joyo kanji plus the Jinmeiyo supplemental set, 2,999 entries total.
 
+![Kanji Grid tile replacements in Anki](docs/assets/kanji-grid-anki-sample.png)
+
 ## Anki Add-on MVP
 
 Build the add-on package:
