@@ -12,7 +12,7 @@ from aqt.qt import (
 )
 from aqt.utils import showCritical
 
-from .duplicate import ConversionOptions, ConversionStats, build_kanji_grid_deck
+from .duplicate import ConversionOptions, ConversionStats, build_kanji_grid_deck, default_output_deck_name
 
 
 @dataclass(frozen=True)
@@ -74,7 +74,7 @@ class KanjiGridDialog(QDialog):
             return
 
         if not self.output_name.text().strip():
-            self.output_name.setText(f"{source_deck_name}::Kanji Grid")
+            self.output_name.setText(default_output_deck_name(source_deck_name))
 
     def _accept_if_valid(self) -> None:
         options = self.options()

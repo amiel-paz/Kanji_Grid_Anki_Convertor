@@ -14,6 +14,7 @@ class ConversionOptions:
 
 @dataclass
 class ConversionStats:
+    output_deck_name: str = ""
     notes_seen: int = 0
     notes_created: int = 0
     fields_changed: int = 0
@@ -24,9 +25,9 @@ def build_kanji_grid_deck(collection: Any, options: ConversionOptions) -> Conver
     if options.source_deck_name == options.output_deck_name:
         raise ValueError("Output deck must be different from source deck.")
 
-    output_deck_id = _deck_id(collection, options.output_deck_name)
+    output_deck_id, output_deck_name = _deck_id_with_filtered_deck_fallback(collection, options)
     source_note_ids = collection.find_notes(f'deck:"{options.source_deck_name}"')
-    stats = ConversionStats(notes_seen=len(source_note_ids))
+    stats = ConversionStats(output_deck_name=output_deck_name, notes_seen=len(source_note_ids))
 
     for note_id in source_note_ids:
         source_note = collection.get_note(note_id)
@@ -53,6 +54,24 @@ def build_kanji_grid_deck(collection: Any, options: ConversionOptions) -> Conver
         stats.notes_created += 1
 
     return stats
+
+
+def default_output_deck_name(source_deck_name: str) -> str:
+    flattened_source_name = " - ".join(part.strip() for part in source_deck_name.split("::") if part.strip())
+    return f"{flattened_source_name} Kanji Grid"
+
+
+def _deck_id_with_filtered_deck_fallback(collection: Any, options: ConversionOptions) -> tuple[int, str]:
+    try:
+        return _deck_id(collection, options.output_deck_name), options.output_deck_name
+    except Exception as error:
+        if "filtered deck" not in str(error).lower():
+            raise
+
+        fallback_name = default_output_deck_name(options.source_deck_name)
+        if fallback_name == options.output_deck_name:
+            raise
+        return _deck_id(collection, fallback_name), fallback_name
 
 
 def _deck_id(collection: Any, deck_name: str) -> int:

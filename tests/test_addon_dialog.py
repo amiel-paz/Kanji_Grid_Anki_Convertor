@@ -155,7 +155,7 @@ class AddonDialogTests(unittest.TestCase):
         options = dialog.options()
 
         self.assertEqual(options.source_deck_name, "Core")
-        self.assertEqual(options.output_deck_name, "Core::Kanji Grid")
+        self.assertEqual(options.output_deck_name, "Core Kanji Grid")
 
 
 if __name__ == "__main__":

@@ -30,7 +30,7 @@ def open_converter_dialog() -> None:
         tooltip("Kanji Grid deck created")
         showInfo(
             "Kanji Grid deck created.\n\n"
-            f"Output deck: {options.output_deck_name}\n"
+            f"Output deck: {stats.output_deck_name}\n"
             f"Notes created: {stats.notes_created}\n"
             f"Fields changed: {stats.fields_changed}\n"
             f"Kanji replacements: {stats.replacements}"

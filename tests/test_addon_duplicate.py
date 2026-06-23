@@ -60,6 +60,13 @@ class FakeDecks:
         return self.created.setdefault(name, deck_id)
 
 
+class FakeFilteredDecks(FakeDecks):
+    def id_for_name(self, name):
+        if "::" in name:
+            raise RuntimeError("Filtered decks can not have child decks.")
+        return super().id_for_name(name)
+
+
 class FakeCollection:
     def __init__(self):
         self.decks = FakeDecks()
@@ -83,6 +90,12 @@ class FakeCollection:
         self.created_notes.append((deck_id, note))
 
 
+class FakeFilteredCollection(FakeCollection):
+    def __init__(self):
+        super().__init__()
+        self.decks = FakeFilteredDecks()
+
+
 class AddonDuplicateTests(unittest.TestCase):
     def test_builds_output_deck_with_transformed_duplicate_notes(self):
         collection = FakeCollection()
@@ -95,6 +108,7 @@ class AddonDuplicateTests(unittest.TestCase):
 
         self.assertEqual(stats.notes_seen, 2)
         self.assertEqual(stats.notes_created, 2)
+        self.assertEqual(stats.output_deck_name, "Japanese::Kanji Grid")
         self.assertEqual(stats.fields_changed, 2)
         self.assertEqual(stats.replacements, 3)
         self.assertEqual(collection.query, 'deck:"Japanese"')
@@ -120,6 +134,27 @@ class AddonDuplicateTests(unittest.TestCase):
                     output_deck_name="Japanese",
                 ),
             )
+
+    def test_falls_back_to_top_level_output_when_filtered_parent_rejects_child_deck(self):
+        collection = FakeFilteredCollection()
+
+        stats = duplicate.build_kanji_grid_deck(
+            collection,
+            duplicate.ConversionOptions(
+                source_deck_name="Pass JLPT N3",
+                output_deck_name="Pass JLPT N3::Kanji Grid",
+            ),
+        )
+
+        self.assertEqual(stats.notes_created, 2)
+        self.assertEqual(stats.output_deck_name, "Pass JLPT N3 Kanji Grid")
+        self.assertIn("Pass JLPT N3 Kanji Grid", collection.decks.created)
+
+    def test_default_output_deck_name_is_top_level(self):
+        self.assertEqual(
+            duplicate.default_output_deck_name("Parent::Child"),
+            "Parent - Child Kanji Grid",
+        )
 
 
 if __name__ == "__main__":
