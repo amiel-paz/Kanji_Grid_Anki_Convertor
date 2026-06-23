@@ -45,11 +45,6 @@ class KanjiGridDialog(QDialog):
         form.addRow("Source deck", self.deck_combo)
         form.addRow("Output deck", self.output_name)
 
-        controls = QHBoxLayout()
-        controls.addWidget(self.select_all)
-        controls.addStretch(1)
-        controls.addWidget(refresh_button)
-
         layout = QVBoxLayout(self)
         layout.addLayout(form)
         layout.addWidget(button_box)
