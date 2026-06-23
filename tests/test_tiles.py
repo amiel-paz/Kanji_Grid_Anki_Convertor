@@ -1,6 +1,6 @@
 import unittest
 
-from kanji_grid_anki_converter.tiles import TILE_CODES, build_tile_html, replace_kanji_with_tiles
+from kanji_grid_anki_converter.tiles import TILE_CODES, build_tile_html, contains_kanji, replace_kanji_with_tiles
 
 
 class TileReplacementTests(unittest.TestCase):
@@ -16,6 +16,11 @@ class TileReplacementTests(unittest.TestCase):
         self.assertEqual(result.replacements, 2)
         self.assertIn("kanji-grid-tile", result.text)
         self.assertIn("[かんじ]", result.text)
+
+    def test_detects_any_kanji_for_front_filtering(self):
+        self.assertTrue(contains_kanji("捕まる"))
+        self.assertTrue(contains_kanji("𠮷野"))
+        self.assertFalse(contains_kanji("まる"))
 
     def test_skips_html_ruby_reading_tags(self):
         result = replace_kanji_with_tiles("<ruby>漢<rt>漢</rt></ruby>")

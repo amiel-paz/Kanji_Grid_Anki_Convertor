@@ -35,8 +35,23 @@ TILE_CODES = load_tile_codes()
 TILE_COLORS = load_tile_colors()
 
 
-def contains_mapped_kanji(text: str, tile_codes: Mapping[str, str] = TILE_CODES) -> bool:
-    return replace_kanji_with_tiles(text, tile_codes).replacements > 0
+def contains_kanji(text: str) -> bool:
+    return any(_is_kanji_codepoint(char) for char in text)
+
+
+def _is_kanji_codepoint(char: str) -> bool:
+    codepoint = ord(char)
+    return (
+        0x3400 <= codepoint <= 0x4DBF
+        or 0x4E00 <= codepoint <= 0x9FFF
+        or 0xF900 <= codepoint <= 0xFAFF
+        or 0x20000 <= codepoint <= 0x2A6DF
+        or 0x2A700 <= codepoint <= 0x2B73F
+        or 0x2B740 <= codepoint <= 0x2B81F
+        or 0x2B820 <= codepoint <= 0x2CEAF
+        or 0x2CEB0 <= codepoint <= 0x2EBEF
+        or 0x30000 <= codepoint <= 0x323AF
+    )
 
 
 def replace_kanji_with_tiles(text: str, tile_codes: Mapping[str, str] = TILE_CODES) -> ReplacementResult:

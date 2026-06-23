@@ -89,11 +89,13 @@ class FakeCollection:
         self.source_notes = {
             1: FakeNote({"Expression": "漢字[かんじ]", "Meaning": "愛"}, ["source-tag"], card_ordinals=[0, 1]),
             2: FakeNote({"Expression": "かな", "Meaning": "kana"}, []),
+            3: FakeNote({"Expression": "𠮷野", "Meaning": "unmapped compatibility test"}, []),
         }
         self.source_cards = {
             11: FakeCard(11, 1, 0, "漢字[かんじ]"),
             12: FakeCard(12, 1, 1, "kana-only prompt"),
             21: FakeCard(21, 2, 0, "かな"),
+            31: FakeCard(31, 3, 0, "𠮷野"),
         }
         self.created_notes = []
         self.created_cards = {}
@@ -141,14 +143,14 @@ class AddonDuplicateTests(unittest.TestCase):
 
         stats = duplicate.build_kanji_grid_deck(collection, options)
 
-        self.assertEqual(stats.notes_seen, 2)
-        self.assertEqual(stats.cards_seen, 3)
-        self.assertEqual(stats.notes_created, 1)
-        self.assertEqual(stats.cards_created, 1)
+        self.assertEqual(stats.notes_seen, 3)
+        self.assertEqual(stats.cards_seen, 4)
+        self.assertEqual(stats.notes_created, 2)
+        self.assertEqual(stats.cards_created, 2)
         self.assertEqual(stats.cards_skipped, 2)
         self.assertEqual(stats.output_deck_name, "Japanese::Kanji Grid")
-        self.assertEqual(stats.fields_changed, 2)
-        self.assertEqual(stats.replacements, 3)
+        self.assertEqual(stats.fields_changed, 3)
+        self.assertEqual(stats.replacements, 4)
         self.assertEqual(collection.query, 'deck:"Japanese"')
         self.assertEqual(collection.decks.created["Japanese::Kanji Grid"], 100)
 
@@ -159,8 +161,11 @@ class AddonDuplicateTests(unittest.TestCase):
         self.assertIn("source-tag", first_note.tags)
         self.assertIn("kanji-grid", first_note.tags)
 
-        self.assertEqual(len(collection.created_notes), 1)
+        self.assertEqual(len(collection.created_notes), 2)
         self.assertEqual(len(collection.removed_card_ids), 1)
+        second_note = collection.created_notes[1][1]
+        self.assertIn("𠮷", second_note["Expression"])
+        self.assertIn("kanji-grid-tile", second_note["Expression"])
 
     def test_rejects_overwriting_source_deck(self):
         with self.assertRaises(ValueError):
@@ -183,7 +188,7 @@ class AddonDuplicateTests(unittest.TestCase):
             ),
         )
 
-        self.assertEqual(stats.notes_created, 1)
+        self.assertEqual(stats.notes_created, 2)
         self.assertEqual(stats.output_deck_name, "Pass JLPT N3 Kanji Grid")
         self.assertIn("Pass JLPT N3 Kanji Grid", collection.decks.created)
 

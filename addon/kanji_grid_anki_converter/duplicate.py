@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from .tiles import contains_mapped_kanji, replace_kanji_with_tiles
+from .tiles import contains_kanji, replace_kanji_with_tiles
 
 
 @dataclass(frozen=True)
@@ -122,7 +122,7 @@ def _eligible_front_card_ordinals(
         note_id = int(card.nid)
         ordinal = int(card.ord)
         all_ordinals_by_note_id.setdefault(note_id, set()).add(ordinal)
-        if contains_mapped_kanji(card.question()):
+        if contains_kanji(card.question()):
             eligible_ordinals_by_note_id.setdefault(note_id, set()).add(ordinal)
 
     return eligible_ordinals_by_note_id, all_ordinals_by_note_id
