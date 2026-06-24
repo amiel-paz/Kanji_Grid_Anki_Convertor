@@ -205,21 +205,29 @@ def _remove_ineligible_generated_cards(collection: Any, note: Any, eligible_ordi
 
 def _copy_card_scheduling(source_card: Any, target_card: Any, target_deck_id: int) -> None:
     target_card.did = target_deck_id
+    source_due = getattr(source_card, "due", 0)
+    source_odue = getattr(source_card, "odue", 0)
+    source_odid = getattr(source_card, "odid", 0)
+    if source_odid and source_odue:
+        source_due = source_odue
+
     for attribute in (
         "type",
         "queue",
-        "due",
         "ivl",
         "factor",
         "reps",
         "lapses",
         "left",
         "flags",
-        "odue",
     ):
         if hasattr(source_card, attribute) and hasattr(target_card, attribute):
             setattr(target_card, attribute, getattr(source_card, attribute))
 
+    if hasattr(target_card, "due"):
+        target_card.due = source_due
+    if hasattr(target_card, "odue"):
+        target_card.odue = 0
     if hasattr(target_card, "odid"):
         target_card.odid = 0
 

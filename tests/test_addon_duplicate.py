@@ -71,6 +71,8 @@ class FakeCard:
         card_type=0,
         ivl=0,
         reps=0,
+        odue=0,
+        odid=0,
     ):
         self.id = card_id
         self.nid = note_id
@@ -86,8 +88,8 @@ class FakeCard:
         self.lapses = 0
         self.left = 0
         self.flags = 0
-        self.odue = 0
-        self.odid = 0
+        self.odue = odue
+        self.odid = odid
         self.flushed = False
         self._note = None
 
@@ -132,7 +134,7 @@ class FakeCollection:
             11: FakeCard(11, 1, 0, "漢字[かんじ]", did=11, due=42, queue=2, card_type=2, ivl=15, reps=9),
             12: FakeCard(12, 1, 1, "kana-only prompt", did=11, due=99, queue=2, card_type=2),
             21: FakeCard(21, 2, 0, "かな", did=11),
-            31: FakeCard(31, 3, 0, "𠮷野", did=11, due=7, queue=1, card_type=1, ivl=3, reps=4),
+            31: FakeCard(31, 3, 0, "𠮷野", did=999, due=-99899, queue=2, card_type=2, ivl=3, reps=4, odue=581, odid=11),
         }
         for card in self.source_cards.values():
             card._note = self.source_notes[card.nid]
@@ -219,6 +221,11 @@ class AddonDuplicateTests(unittest.TestCase):
         second_note = collection.created_notes[1][1]
         self.assertIn("𠮷", second_note["Expression"])
         self.assertIn("kanji-grid-tile", second_note["Expression"])
+        filtered_source_card = collection.created_cards[1003]
+        self.assertEqual(filtered_source_card.did, 100)
+        self.assertEqual(filtered_source_card.due, 581)
+        self.assertEqual(filtered_source_card.odue, 0)
+        self.assertEqual(filtered_source_card.odid, 0)
 
     def test_rejects_overwriting_source_deck(self):
         with self.assertRaises(ValueError):
@@ -264,19 +271,33 @@ class AddonDuplicateTests(unittest.TestCase):
         target_card = FakeCard(5001, 501, 0, "", did=100, due=0, queue=0)
         target_card._note = target_note
         collection.created_cards[5001] = target_card
-        collection.find_cards = lambda query: [5001] if "Kanji Grid" in query else [11, 12, 21, 31]
+        filtered_target_note = FakeNote(
+            {
+                "Expression": duplicate.replace_kanji_with_tiles("𠮷野").text,
+                "Meaning": "unmapped compatibility test",
+            },
+            ["kanji-grid"],
+        )
+        filtered_target_card = FakeCard(5002, 502, 0, "", did=100, due=-99899, queue=2)
+        filtered_target_card._note = filtered_target_note
+        collection.created_cards[5002] = filtered_target_card
+        collection.find_cards = lambda query: [5001, 5002] if "Kanji Grid" in query else [11, 12, 21, 31]
 
         stats = duplicate.sync_kanji_grid_scheduling(collection)
 
         self.assertEqual(stats.deck_pairs_seen, 1)
-        self.assertEqual(stats.cards_seen, 1)
-        self.assertEqual(stats.cards_updated, 1)
+        self.assertEqual(stats.cards_seen, 2)
+        self.assertEqual(stats.cards_updated, 2)
         self.assertEqual(stats.cards_unmatched, 0)
         self.assertEqual(target_card.did, 100)
         self.assertEqual(target_card.due, 42)
         self.assertEqual(target_card.queue, 2)
         self.assertEqual(target_card.ivl, 15)
         self.assertEqual(target_card.reps, 9)
+        self.assertEqual(filtered_target_card.did, 100)
+        self.assertEqual(filtered_target_card.due, 581)
+        self.assertEqual(filtered_target_card.odue, 0)
+        self.assertEqual(filtered_target_card.odid, 0)
 
 
 if __name__ == "__main__":
